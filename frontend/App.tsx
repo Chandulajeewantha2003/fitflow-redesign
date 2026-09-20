@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 
+import WelcomeScreen from './components/WelcomeScreen';
+
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +16,10 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 
+// ==========================================
+// TYPES
+// ==========================================
+
 type Workout = {
   id: number;
   title: string;
@@ -21,10 +27,18 @@ type Workout = {
   difficulty: string;
 };
 
-// IMPORTANT: Replace this with your computer's current IPv4 address.
+type Screen = 'welcome' | 'home';
+
+// IMPORTANT:
+// Use your computer's CURRENT IPv4 address.
+// This must be a plain URL, not a Markdown link.
 const API_URL = 'http://10.218.237.129:3000';
 
-export default function App() {
+// ==========================================
+// HOME SCREEN
+// ==========================================
+
+function HomeScreen() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -143,6 +157,28 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+// ==========================================
+// MAIN APP — WELCOME → HOME
+// ==========================================
+
+export default function App() {
+  const [screen, setScreen] = useState<Screen>('welcome');
+
+  if (screen === 'welcome') {
+    return (
+      <WelcomeScreen
+        onStart={() => setScreen('home')}
+      />
+    );
+  }
+
+  return <HomeScreen />;
+}
+
+// ==========================================
+// STYLES
+// ==========================================
 
 const styles = StyleSheet.create({
   container: {
