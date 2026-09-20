@@ -1,22 +1,38 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 
-describe('AppController', () => {
-  let appController: AppController;
+import { Controller, Get } from '@nestjs/common';
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
+@Controller()
+export class AppController {
 
-    appController = app.get<AppController>(AppController);
-  });
+  @Get()
+  getHello() {
+    return {
+      message: 'FitFlow Backend is running!',
+    };
+  }
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
-});
+  @Get('workouts')
+  getWorkouts() {
+    return [
+      {
+        id: 1,
+        title: 'Full Body Workout',
+        duration: 30,
+        difficulty: 'Beginner',
+      },
+      {
+        id: 2,
+        title: 'Cardio Training',
+        duration: 20,
+        difficulty: 'Intermediate',
+      },
+      {
+        id: 3,
+        title: 'Strength Training',
+        duration: 45,
+        difficulty: 'Advanced',
+      },
+    ];
+  }
+
+}

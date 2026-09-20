@@ -1,12 +1,38 @@
+
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service.js';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHello() {
+    return {
+      message: 'FitFlow Backend is running!',
+    };
   }
+
+  @Get('workouts')
+  getWorkouts() {
+    return [
+      {
+        id: 1,
+        title: 'Full Body Workout',
+        duration: 30,
+        difficulty: 'Beginner',
+      },
+      {
+        id: 2,
+        title: 'Cardio Training',
+        duration: 20,
+        difficulty: 'Intermediate',
+      },
+      {
+        id: 3,
+        title: 'Strength Training',
+        duration: 45,
+        difficulty: 'Advanced',
+      },
+    ];
+  }
+
 }
