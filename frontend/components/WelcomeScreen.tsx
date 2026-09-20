@@ -225,7 +225,7 @@ export default function WelcomeScreen({
                     <View style={styles.textContainer}>
                         <View style={styles.smallLabel}>
                             <Text style={styles.smallLabelText}>
-                                YOUR FITNESS JOURNEY STARTS HERE
+                                YOUR FITNESS JOURNEY STARTS HERE Test Chandula
                             </Text>
                         </View>
 
