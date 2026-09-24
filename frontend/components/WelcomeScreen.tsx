@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import {
-    SafeAreaProvider,
     SafeAreaView,
 } from 'react-native-safe-area-context';
 
@@ -185,7 +184,6 @@ export default function WelcomeScreen({
     onStart,
 }: WelcomeScreenProps) {
     return (
-        <SafeAreaProvider>
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -272,7 +270,6 @@ export default function WelcomeScreen({
                     </View>
                 </ScrollView>
             </SafeAreaView>
-        </SafeAreaProvider>
     );
 }
 

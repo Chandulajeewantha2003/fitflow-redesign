@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
-
-import WelcomeScreen from './components/WelcomeScreen';
 
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -15,6 +13,15 @@ import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
+
+import WelcomeScreen from './components/WelcomeScreen';
+import LoginScreen from './components/LoginScreen';
+import RegisterScreen from './components/RegisterScreen';
+import { API_URL } from './services/api';
+
+import {
+  AuthUser,
+} from './services/auth';
 
 // ==========================================
 // TYPES
@@ -27,45 +34,65 @@ type Workout = {
   difficulty: string;
 };
 
-type Screen = 'welcome' | 'home';
+type Screen =
+  | 'welcome'
+  | 'login'
+  | 'register'
+  | 'home';
 
-// IMPORTANT:
-// Use your computer's CURRENT IPv4 address.
-// This must be a plain URL, not a Markdown link.
-const API_URL = 'http://10.218.237.129:3000';
 
 // ==========================================
 // HOME SCREEN
 // ==========================================
 
-function HomeScreen() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+function HomeScreen({
+  user,
+}: {
+  user: AuthUser | null;
+}) {
+  const [workouts, setWorkouts] =
+    useState<Workout[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState('');
 
   useEffect(() => {
-    const controller = new AbortController();
+    const controller =
+      new AbortController();
 
     async function fetchWorkouts() {
       try {
         setLoading(true);
         setError('');
 
-        const response = await fetch(`${API_URL}/workouts`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `${API_URL}/workouts`,
+          {
+            signal: controller.signal,
+          }
+        );
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          throw new Error(
+            `HTTP ${response.status}`
+          );
         }
 
-        const data: Workout[] = await response.json();
+        const data: Workout[] =
+          await response.json();
 
-        if (!controller.signal.aborted) {
+        if (
+          !controller.signal.aborted
+        ) {
           setWorkouts(data);
         }
       } catch (err) {
-        if (!controller.signal.aborted) {
+        if (
+          !controller.signal.aborted
+        ) {
           setError(
             err instanceof Error
               ? err.message
@@ -73,7 +100,9 @@ function HomeScreen() {
           );
         }
       } finally {
-        if (!controller.signal.aborted) {
+        if (
+          !controller.signal.aborted
+        ) {
           setLoading(false);
         }
       }
@@ -87,7 +116,6 @@ function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaProvider>
       <SafeAreaView
         style={styles.container}
         edges={['top', 'bottom']}
@@ -100,6 +128,18 @@ function HomeScreen() {
           Your Fitness Journey
         </Text>
 
+        {user?.email ? (
+          <View style={styles.userCard}>
+            <Text style={styles.welcomeText}>
+              Welcome back 👋
+            </Text>
+
+            <Text style={styles.userEmail}>
+              {user.email}
+            </Text>
+          </View>
+        ) : null}
+
         <Text style={styles.heading}>
           My Workouts
         </Text>
@@ -108,45 +148,84 @@ function HomeScreen() {
           <View style={styles.center}>
             <ActivityIndicator
               size="large"
-              color="#16A34A"
+              color="#079455"
             />
 
-            <Text style={styles.loadingText}>
+            <Text
+              style={
+                styles.loadingText
+              }
+            >
               Loading workouts...
             </Text>
           </View>
         ) : error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorTitle}>
+          <View
+            style={styles.errorBox}
+          >
+            <Text
+              style={
+                styles.errorTitle
+              }
+            >
               Unable to load workouts
             </Text>
 
-            <Text style={styles.error}>
+            <Text
+              style={styles.error}
+            >
               {error}
             </Text>
           </View>
         ) : (
           <FlatList
             data={workouts}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
+            keyExtractor={(item) =>
+              item.id.toString()
+            }
+            showsVerticalScrollIndicator={
+              false
+            }
+            contentContainerStyle={
+              styles.listContent
+            }
             ListEmptyComponent={
-              <Text style={styles.emptyText}>
+              <Text
+                style={
+                  styles.emptyText
+                }
+              >
                 No workouts available.
               </Text>
             }
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <Text style={styles.workoutTitle}>
+            renderItem={({
+              item,
+            }) => (
+              <View
+                style={styles.card}
+              >
+                <Text
+                  style={
+                    styles.workoutTitle
+                  }
+                >
                   {item.title}
                 </Text>
 
-                <Text style={styles.details}>
-                  {item.duration} minutes
+                <Text
+                  style={
+                    styles.details
+                  }
+                >
+                  {item.duration}{' '}
+                  minutes
                 </Text>
 
-                <Text style={styles.details}>
+                <Text
+                  style={
+                    styles.details
+                  }
+                >
                   {item.difficulty}
                 </Text>
               </View>
@@ -154,116 +233,257 @@ function HomeScreen() {
           />
         )}
       </SafeAreaView>
-    </SafeAreaProvider>
   );
 }
 
 // ==========================================
-// MAIN APP — WELCOME → HOME
+// MAIN APP
 // ==========================================
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('welcome');
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
+  const [screen, setScreen] =
+    useState<Screen>('welcome');
+
+  const [
+    currentUser,
+    setCurrentUser,
+  ] = useState<AuthUser | null>(
+    null
+  );
+
+  // ========================================
+  // LOGIN / REGISTER SUCCESS
+  // ========================================
+
+  function handleAuthSuccess(
+    user: AuthUser
+  ) {
+    setCurrentUser(user);
+
+    // For now:
+    // Login/Register -> Home
+    //
+    // Later we will change registration to:
+    // Register
+    // -> Age
+    // -> Height
+    // -> Weight
+    // -> Goal
+    // -> Welcome Complete
+    // -> Home
+
+    setScreen('home');
+  }
+
+  // ========================================
+  // GOOGLE BUTTON
+  // ========================================
+
+  function handleGoogle() {
+    Alert.alert(
+      'Google Sign In',
+      'Google authentication will be connected using the Android development build.'
+    );
+  }
+
+  // ========================================
+  // WELCOME
+  // ========================================
 
   if (screen === 'welcome') {
     return (
       <WelcomeScreen
-        onStart={() => setScreen('home')}
+        onStart={() =>
+          setScreen('login')
+        }
       />
     );
   }
 
-  return <HomeScreen />;
+  // ========================================
+  // LOGIN
+  // ========================================
+
+  if (screen === 'login') {
+    return (
+      <LoginScreen
+        onBack={() =>
+          setScreen('welcome')
+        }
+        onRegister={() =>
+          setScreen('register')
+        }
+        onGoogle={handleGoogle}
+        onSuccess={
+          handleAuthSuccess
+        }
+      />
+    );
+  }
+
+  // ========================================
+  // REGISTER
+  // ========================================
+
+  if (screen === 'register') {
+    return (
+      <RegisterScreen
+        onBack={() =>
+          setScreen('login')
+        }
+        onLogin={() =>
+          setScreen('login')
+        }
+        onGoogle={handleGoogle}
+        onSuccess={
+          handleAuthSuccess
+        }
+      />
+    );
+  }
+
+  // ========================================
+  // HOME
+  // ========================================
+
+  return (
+    <HomeScreen
+      user={currentUser}
+    />
+  );
 }
 
 // ==========================================
-// STYLES
+// HOME SCREEN STYLES
 // ==========================================
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA',
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
+const styles =
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#F5F7FA',
+      paddingHorizontal: 24,
+      paddingTop: 24,
+    },
 
-  title: {
-    fontSize: 34,
-    fontWeight: 'bold',
-    color: '#16A34A',
-  },
+    title: {
+      fontSize: 34,
+      fontWeight: '800',
+      color: '#079455',
+      letterSpacing: -1,
+    },
 
-  subtitle: {
-    fontSize: 15,
-    color: '#64748B',
-    marginBottom: 32,
-  },
+    subtitle: {
+      fontSize: 15,
+      color: '#64748B',
+      marginTop: 3,
+      marginBottom: 24,
+    },
 
-  heading: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 20,
-  },
+    userCard: {
+      backgroundColor: '#EAF8EF',
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 25,
+      borderWidth: 1,
+      borderColor: '#D3F0DE',
+    },
 
-  listContent: {
-    paddingBottom: 24,
-  },
+    welcomeText: {
+      color: '#166534',
+      fontSize: 14,
+      fontWeight: '700',
+    },
 
-  card: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 14,
-    elevation: 2,
-  },
+    userEmail: {
+      color: '#475467',
+      fontSize: 13,
+      marginTop: 4,
+    },
 
-  workoutTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
-  },
+    heading: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: '#111827',
+      marginBottom: 20,
+    },
 
-  details: {
-    fontSize: 15,
-    color: '#64748B',
-    marginBottom: 4,
-  },
+    listContent: {
+      paddingBottom: 24,
+    },
 
-  center: {
-    alignItems: 'center',
-    marginTop: 40,
-  },
+    card: {
+      backgroundColor: '#FFFFFF',
+      padding: 20,
+      borderRadius: 16,
+      marginBottom: 14,
 
-  loadingText: {
-    marginTop: 12,
-    color: '#64748B',
-  },
+      shadowColor: '#101828',
 
-  errorBox: {
-    backgroundColor: '#FEE2E2',
-    padding: 16,
-    borderRadius: 12,
-  },
+      shadowOffset: {
+        width: 0,
+        height: 3,
+      },
 
-  errorTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#991B1B',
-    marginBottom: 6,
-  },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
 
-  error: {
-    fontSize: 14,
-    color: '#DC2626',
-  },
+      elevation: 2,
+    },
 
-  emptyText: {
-    fontSize: 15,
-    color: '#64748B',
-    textAlign: 'center',
-    marginTop: 30,
-  },
-});
+    workoutTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: '#111827',
+      marginBottom: 8,
+    },
+
+    details: {
+      fontSize: 15,
+      color: '#64748B',
+      marginBottom: 4,
+    },
+
+    center: {
+      alignItems: 'center',
+      marginTop: 40,
+    },
+
+    loadingText: {
+      marginTop: 12,
+      color: '#64748B',
+    },
+
+    errorBox: {
+      backgroundColor: '#FEE2E2',
+      padding: 16,
+      borderRadius: 12,
+    },
+
+    errorTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: '#991B1B',
+      marginBottom: 6,
+    },
+
+    error: {
+      fontSize: 14,
+      color: '#DC2626',
+    },
+
+    emptyText: {
+      fontSize: 15,
+      color: '#64748B',
+      textAlign: 'center',
+      marginTop: 30,
+    },
+  });
