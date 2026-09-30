@@ -24,7 +24,7 @@ type WelcomeScreenProps = {
     onStart: () => void;
 };
 
-function FitnessIllustration() {
+export function FitnessIllustration() {
     return (
         <Svg
             width="100%"

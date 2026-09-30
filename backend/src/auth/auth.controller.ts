@@ -4,6 +4,8 @@ import {
     HttpCode,
     HttpStatus,
     Post,
+    Patch,
+    Headers,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service.js';
@@ -13,6 +15,14 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
     ) { }
+
+    @Patch('onboarding')
+    completeOnboarding(
+        @Headers('authorization') authorization: string | undefined,
+        @Body() body: unknown,
+    ) {
+        return this.authService.completeOnboarding(authorization, body);
+    }
 
     @Post('register')
     register(

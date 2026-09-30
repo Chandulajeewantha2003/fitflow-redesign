@@ -23,15 +23,12 @@ import {
 
 @Module({
   imports: [
-    // Load backend/.env
     ConfigModule.forRoot({
       isGlobal: true,
     }),
 
-    // MongoDB Atlas connection
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-
       inject: [ConfigService],
 
       useFactory: (
@@ -41,18 +38,14 @@ import {
           'MONGODB_URI',
         ),
 
-        // Your MongoDB database name
         dbName: 'fit-flow',
 
-        // Prefer IPv4
         family: 4,
 
-        // Fail faster while testing
         serverSelectionTimeoutMS: 10000,
       }),
     }),
 
-    // Authentication module
     AuthModule,
   ],
 

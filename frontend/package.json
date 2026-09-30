@@ -23,6 +23,8 @@
   },
   "scripts": {
     "start": "expo start --go",
+    "start:clear": "expo start --go --clear",
+    "start:tunnel": "expo start --go --tunnel --clear",
     "start:dev-client": "expo start --dev-client",
     "android": "expo start --go --android",
     "ios": "expo start --go --ios",

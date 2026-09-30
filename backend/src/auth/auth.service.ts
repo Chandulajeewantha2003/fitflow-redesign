@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 import { OAuth2Client } from 'google-auth-library';
@@ -31,6 +31,42 @@ export class AuthService {
 
         private readonly configService: ConfigService,
     ) { }
+
+    async completeOnboarding(authorization: string | undefined, body: unknown) {
+        const token = authorization?.match(/^Bearer (\S+)$/i)?.[1];
+        if (!token) throw new UnauthorizedException('Please sign in again');
+        let userId: string;
+        try {
+            const payload = await this.jwtService.verifyAsync<{ sub: string }>(token);
+            if (typeof payload.sub !== 'string' || !isValidObjectId(payload.sub)) {
+                throw new Error('Invalid user');
+            }
+            userId = payload.sub;
+        } catch {
+            throw new UnauthorizedException('Your session has expired. Please sign in again');
+        }
+        if (!body || typeof body !== 'object' || Array.isArray(body)) {
+            throw new BadRequestException('Please provide your profile details');
+        }
+        const { age, height, weight, fitnessGoal } = body as Record<string, unknown>;
+        if (typeof age !== 'number' || !Number.isInteger(age) || age < 13 || age > 120) {
+            throw new BadRequestException('Age must be a whole number between 13 and 120');
+        }
+        if (typeof height !== 'number' || !Number.isFinite(height) || height < 80 || height > 250) {
+            throw new BadRequestException('Height must be between 80 and 250 cm');
+        }
+        if (typeof weight !== 'number' || !Number.isFinite(weight) || weight < 20 || weight > 350) {
+            throw new BadRequestException('Weight must be between 20 and 350 kg');
+        }
+        if (typeof fitnessGoal !== 'string' || !['lose_weight', 'build_strength', 'improve_endurance'].includes(fitnessGoal)) {
+            throw new BadRequestException('Choose a fitness goal');
+        }
+        const user = await this.userModel.findByIdAndUpdate(userId, {
+            $set: { age, height, weight, fitnessGoal, onboardingCompleted: true },
+        }, { new: true, runValidators: true });
+        if (!user) throw new UnauthorizedException('Please sign in again');
+        return this.createAuthResponse(user);
+    }
 
     // ==========================================
     // REGISTER
@@ -227,6 +263,10 @@ export class AuthService {
                 name: user.name ?? '',
                 photo: user.photo ?? '',
                 providers: user.providers,
+                age: user.age,
+                height: user.height,
+                weight: user.weight,
+                fitnessGoal: user.fitnessGoal,
                 onboardingCompleted:
                     user.onboardingCompleted,
             },
