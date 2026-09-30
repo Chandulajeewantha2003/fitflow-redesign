@@ -23,25 +23,25 @@ export const goals: {
   description: string;
   icon: keyof typeof Ionicons.glyphMap;
 }[] = [
-  {
-    value: "lose_weight",
-    title: "Lose Weight",
-    description: "Burn fat and get leaner",
-    icon: "flame",
-  },
-  {
-    value: "build_strength",
-    title: "Build Strength",
-    description: "Get stronger and fitter",
-    icon: "barbell",
-  },
-  {
-    value: "improve_endurance",
-    title: "Improve Endurance",
-    description: "Boost stamina and energy",
-    icon: "walk",
-  },
-];
+    {
+      value: "lose_weight",
+      title: "Lose Weight",
+      description: "Burn fat and get leaner",
+      icon: "flame",
+    },
+    {
+      value: "build_strength",
+      title: "Build Strength",
+      description: "Get stronger and fitter",
+      icon: "barbell",
+    },
+    {
+      value: "improve_endurance",
+      title: "Improve Endurance",
+      description: "Boost stamina and energy",
+      icon: "walk",
+    },
+  ];
 const steps = [
   {
     title: "What's your age?",
