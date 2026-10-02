@@ -385,7 +385,7 @@ export default function MainScreen({
         <View style={{ display: tab === 'Plan' ? 'flex' : 'none' }}><PlanScreen key={user.id} userId={user.id} workouts={workouts} loading={loading} error={error} onRetry={() => setRetry(previous => previous + 1)} onSelectWorkout={setSelected} /></View>
         {tab === 'Progress' && <ProgressScreen user={user} />}
         {tab === 'Community' && <CommunityScreen user={user} />}
-        {tab === 'Nutrition' && <NutritionScreen />}
+        {tab === 'Nutrition' && <NutritionScreen key={user.id} userId={user.id} />}
 
       </ScrollView>
       </KeyboardAvoidingView>

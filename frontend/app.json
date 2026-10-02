@@ -26,7 +26,12 @@
       }
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      ["expo-image-picker", {
+        "cameraPermission": "Allow FitFlow to photograph your meal for review.",
+        "photosPermission": "Allow FitFlow to select a meal photo for review.",
+        "microphonePermission": false
+      }]
     ]
   }
 }
