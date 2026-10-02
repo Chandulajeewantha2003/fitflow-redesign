@@ -32,6 +32,22 @@ export class AuthService {
         private readonly configService: ConfigService,
     ) { }
 
+    async authenticatedUser(authorization: string | undefined) {
+        const token = authorization?.match(/^Bearer (\S+)$/i)?.[1];
+        if (!token) throw new UnauthorizedException('Please sign in again');
+        let userId: string;
+        try {
+            const payload = await this.jwtService.verifyAsync<{ sub: string }>(token);
+            if (typeof payload.sub !== 'string' || !isValidObjectId(payload.sub)) throw new Error('Invalid user');
+            userId = payload.sub;
+        } catch {
+            throw new UnauthorizedException('Your session has expired. Please sign in again');
+        }
+        const user = await this.userModel.findById(userId);
+        if (!user) throw new UnauthorizedException('Please sign in again');
+        return user;
+    }
+
     async completeOnboarding(authorization: string | undefined, body: unknown) {
         const token = authorization?.match(/^Bearer (\S+)$/i)?.[1];
         if (!token) throw new UnauthorizedException('Please sign in again');
