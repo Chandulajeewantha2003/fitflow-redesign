@@ -62,5 +62,6 @@ import {
     providers: [
         AuthService,
     ],
+    exports: [AuthService],
 })
 export class AuthModule { }

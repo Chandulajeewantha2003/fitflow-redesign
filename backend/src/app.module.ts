@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CommunityModule } from './community/community.module.js';
 
 import {
   ConfigModule,
@@ -47,6 +48,7 @@ import {
     }),
 
     AuthModule,
+    CommunityModule,
   ],
 
   controllers: [

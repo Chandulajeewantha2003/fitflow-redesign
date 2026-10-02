@@ -5,7 +5,7 @@ import WelcomeScreen from "./components/WelcomeScreen";
 import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
 import OnboardingScreen from "./components/OnboardingScreen";
-import HomeScreen from "./components/HomeScreen";
+import MainScreen from "./components/MainScreen";
 import { AuthUser, getStoredUser, logoutUser } from "./services/auth";
 
 type Screen = "welcome" | "login" | "register" | "onboarding" | "home";
@@ -81,7 +81,7 @@ function AppContent() {
       />
     );
   if (screen === "home" && user)
-    return <HomeScreen user={user} onSignOut={signOut} />;
+    return <MainScreen user={user} onSignOut={signOut} />;
   return (
     <LoginScreen
       onBack={() => setScreen("welcome")}
